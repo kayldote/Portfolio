@@ -97,6 +97,21 @@ function AboutSlideshow({ expanded = false, enabled = true, photos = aboutPhotos
   );
 }
 
+function AboutPhotoColumn({ enabled = true }: { enabled?: boolean }) {
+  return <div className="about-photo-column"><AboutSlideshow expanded enabled={enabled} />
+        <a
+          href="https://www.linkedin.com/in/kaylee-s-568149272"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="resume-link"
+          style={{ alignSelf: "flex-start", fontSize: 14 }}
+          aria-label="Connect on LinkedIn (opens in a new tab)"
+        >
+          Connect on LinkedIn ↗
+        </a>
+  </div>;
+}
+
 type SectionKey = "about" | "projects" | "skills" | "experience"
 
 interface Section {
@@ -173,51 +188,24 @@ const sections: Section[] = [
     gradient: "linear-gradient(to bottom, #d5e2eb, #d6a0b6)",
     labelColor: "#502238",
     expandedContent: (
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <p
-          style={{ color: "#502238", fontSize: 15, lineHeight: 1.7, margin: 0 }}
-        >
-          Howdy there! My name is Kaylee :). With a background in both graphic design and 
-          computer science, I've consistently been drawn to opportunities to design technology that people truly love.
-          I've often wondered why products with such useful purposes sometimes lack the visual appeal and thoughtful user experience that would make people want to use them.
-          Whether it be developing the front-end of an
-          application, understanding my target user, or conceptualizing a design, I'm interested in any new opportunities that allow me 
-          to work creatively. I'm also curious about how AI can support the design process and help bring new product ideas to life.
-        </p>
-        <p
-          style={{ color: "#502238", fontSize: 14, lineHeight: 1.7, margin: 0 }}
-        >
-          When I'm not pushing pixels, you'll find me
-          putting together a craft, collecting trinkets, or hanging with my 5 cats.
-        </p>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {["Texas A&M Aggie", "Cat Lover", "Designer", "Developer"].map(
-            (tag) => (
-              <span
-                key={tag}
-                style={{
-                  background: "rgba(255,255,255,0.2)",
-                  color: "#502238",
-                  borderRadius: 20,
-                  padding: "4px 14px",
-                  fontSize: 13,
-                }}
-              >
-                {tag}
-              </span>
-            ),
-          )}
+      <div className="about-story">
+        <div className="about-story-intro">
+          <h3>Howdy, I’m Kaylee :)</h3>
+          <p>With a background in graphic design and computer science, I’m drawn to designing technology that people truly love.</p>
         </div>
-        <a
-          href="https://www.linkedin.com/in/kaylee-s-568149272"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="resume-link"
-          style={{ alignSelf: "flex-start", fontSize: 14 }}
-          aria-label="Connect on LinkedIn (opens in a new tab)"
-        >
-          Connect on LinkedIn ↗
-        </a>
+        <section className="about-story-note">
+          <h4>What draws me to design</h4>
+          <p>Useful products deserve thoughtful experiences. I often wonder why something with a great purpose can still feel uninviting or difficult to use. That’s the gap I want to help close.</p>
+        </section>
+        <section className="about-story-note about-story-exploring">
+          <h4>Where my curiosity takes me</h4>
+          <p>I enjoy building front-end experiences, understanding users, and exploring new design ideas. I’m also curious about how AI can support the design process and help bring new products to life.</p>
+        </section>
+        <section className="about-story-offline">
+          <h4>Away from the screen</h4>
+          <p>You’ll find me making crafts, collecting trinkets, or hanging out with my five cats.</p>
+        </section>
+
       </div>
     ),
   },
@@ -247,12 +235,13 @@ const sections: Section[] = [
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "baseline",
+                gap: 12,
               }}
             >
-              <span style={{ color: "#502238", fontWeight: 600, fontSize: 15 }}>
+              <span style={{ color: "#502238", fontWeight: 600, fontSize: 15, minWidth: 0, flex: 1 }}>
                 {p.name}
               </span>
-              <span style={{ color: "#502238", fontSize: 12 }}>{p.year}</span>
+              <span style={{ color: "#502238", fontSize: 12, whiteSpace: "nowrap", flexShrink: 0 }}>{p.year}</span>
             </div>
             <p
               style={{
@@ -319,7 +308,7 @@ const sections: Section[] = [
                 <span
                   key={item}
                   style={{
-                    background: "rgba(180,71,111,0.12)",
+                    background: "rgba(255,255,255,0.55)",
                     color: "#502238",
                     borderRadius: 6,
                     padding: "3px 12px",
@@ -434,8 +423,8 @@ function SectionCard({
 
   const vw = viewport.width
   const vh = viewport.height
-  const expandW = Math.max(1, Math.min(section.key === "about" ? 820 : 520, vw - 48))
-  const expandH = Math.max(1, Math.min(540, vh - 32))
+  const expandW = Math.max(1, Math.min(section.key === "about" ? 960 : 520, vw - 48))
+  const expandH = Math.max(1, Math.min(section.key === "about" ? 720 : 540, vh - 32))
   const expandTop = (vh - expandH) / 2
   const expandLeft = (vw - expandW) / 2
 
@@ -640,7 +629,7 @@ function SectionCard({
           >
             {section.key === "about" ? (
               <div className="about-expanded-layout">
-                <AboutSlideshow expanded enabled={contentVisible} />
+                <AboutPhotoColumn enabled={contentVisible} />
                 <div className="about-expanded-text">{section.expandedContent}</div>
               </div>
             ) : section.expandedContent}
@@ -652,8 +641,42 @@ function SectionCard({
 }
 
 
+function MobilePortfolioSections() {
+  const [active, setActive] = useState<SectionKey>("about");
+  useEffect(() => {
+    const update = () => {
+      let current: SectionKey = "about";
+      sections.forEach(section => {
+        if ((document.getElementById(`home-${section.key}`)?.getBoundingClientRect().top ?? Infinity) <= 130) current = section.key;
+      });
+      setActive(current);
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+  return <div className="mobile-portfolio-sections">
+    <nav className="mobile-home-nav" aria-label="Portfolio sections">
+      {sections.map(section => <a key={section.key} href={`#home-${section.key}`} aria-current={active === section.key ? "location" : undefined}>{section.key === "experience" ? "Experience" : section.label}</a>)}
+    </nav>
+    {sections.map(section => <section className="mobile-home-section" id={`home-${section.key}`} key={section.key} aria-labelledby={`home-heading-${section.key}`} style={{ background: section.gradient }}>
+      <h2 id={`home-heading-${section.key}`}>{section.label}</h2>
+      {section.key === "about" && <AboutPhotoColumn />}
+      {section.key === "projects" && projectPhotos.length > 0 && <AboutSlideshow photos={projectPhotos} project expanded />}
+      <div className="mobile-home-content">{section.expandedContent}</div>
+    </section>)}
+  </div>;
+}
+
 function Portfolio() {
   const [openKey, setOpenKey] = useState<SectionKey | null>(null)
+  const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 640px)").matches);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 640px)");
+    const update = () => { setMobile(media.matches); setOpenKey(null); };
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     if (!openKey) return
@@ -725,16 +748,16 @@ function Portfolio() {
             }}
             className="identity-line"
           >
-            <span>designer &amp; developer</span>
-            <span className="homepage-creativity-quote">“You can’t use up creativity. The more you use the more you have.” <span>― Maya Angelou</span></span>
+            <span className="identity-paper" aria-label="designer and developer"><span className="identity-writing" aria-hidden="true">★ designer &amp; developer</span></span>
+            <span className="identity-aggie-paper">texas a&amp;m aggie</span>
           </p>
           {/* <div className="current-update-bubble">
             Currently: Finishing my internship @ Amentum & my CS bache.
           </div> */}
         </div>
 
-        {/* Bento grid */}
-        <div
+        {/* Mobile sections are expanded; desktop retains the bento dialogs. */}
+        {mobile ? <MobilePortfolioSections /> : <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
@@ -778,7 +801,7 @@ function Portfolio() {
               setOpenKey={setOpenKey}
             />
           </div>
-        </div>
+        </div>}
       </div>
 
       <style>{`
@@ -788,11 +811,23 @@ function Portfolio() {
         }
         @media (max-width: 640px) {
           .bento-grid {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
           }
-          .bento-grid > div {
+          .bento-grid > div:nth-child(1) {
+            grid-column: 1 / -1 !important;
+            grid-row: 2 !important;
+          }
+          .bento-grid > div:nth-child(2) {
+            grid-column: 1 / -1 !important;
+            grid-row: 3 !important;
+          }
+          .bento-grid > div:nth-child(3) {
             grid-column: 1 !important;
-            grid-row: auto !important;
+            grid-row: 1 !important;
+          }
+          .bento-grid > div:nth-child(4) {
+            grid-column: 2 !important;
+            grid-row: 1 !important;
           }
         }
       `}</style>
@@ -816,11 +851,15 @@ export default function App() {
         display: "flex",
         alignItems: "center",
         padding: "40px 24px",
-        background: isResume ? "#f5edf1" : "#edf4fa",
+        background: isResume ? "#f5edf1" : "radial-gradient(ellipse at 30% 20%, rgba(209,183,198,0.9) 0%, rgba(255,255,255,1) 70%)",
         color: "#502238",
       }}
     >
-      <article className="project-page-enter" style={{ width: "100%", maxWidth: 760, margin: "0 auto" }}>
+      {!isResume && <div className="flower-background" aria-hidden="true">
+        <img className="floating-flower" src={lilyImage} alt="" draggable={false} data-no-enlarge />
+        <img className="floating-flower floating-flower-left" src={lilyLeftImage} alt="" draggable={false} data-no-enlarge />
+      </div>}
+      <article className="project-page-enter" style={{ width: "100%", maxWidth: 760, margin: "0 auto", position: "relative" }}>
         <a href="/" className="resume-link">
           ← Back to portfolio
         </a>
