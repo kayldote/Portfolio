@@ -1,0 +1,10 @@
+{
+  "description": "This interactive web application allows users to explore various sections that expand with detailed information, enhancing user engagement through animations.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
